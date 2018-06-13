@@ -5,14 +5,12 @@ import onionify from 'cycle-onionify';
 
 import { Component } from './interfaces';
 
-// Set of Drivers used in this App
-const drivers = {
+export const drivers = {
     DOM: makeDOMDriver('#app'),
     time: timeDriver
 };
 
-export const driverNames = Object.keys(drivers)
-    .concat(['onion']);
+export const driverNames = Object.keys(drivers).concat(['onion']);
 
 export function wrapMain(main: Component): Component {
     return onionify(main as any);

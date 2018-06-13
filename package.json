@@ -5,17 +5,17 @@
   "devDependencies": {
     "cycle-scripts-one-fits-all": "5.4.3",
     "husky": "^0.14.3",
-    "lint-staged": "^7.0.3",
-    "prettier": "^1.11.1",
+    "lint-staged": "^7.2.0",
+    "prettier": "^1.13.5"
   },
   "dependencies": {
-    "@cycle/dom": "^20.2.0",
-    "@cycle/isolate": "^3.2.0",
+    "@cycle/dom": "^20.4.0",
+    "@cycle/isolate": "^3.3.0",
     "@cycle/run": "^4.1.0",
     "@cycle/time": "^0.13.0",
-    "cycle-onionify": "^5.0.0",
+    "cycle-onionify": "^6.0.0",
     "cyclejs-utils": "^3.1.0",
-    "xstream": "^11.2.0"
+    "xstream": "^11.4.0"
   },
   "scripts": {
     "precommit": "lint-staged",
