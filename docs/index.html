@@ -1,0 +1,473 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>FRP with Cycle.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+        <style>
+        .yellow {
+            color: yellow !important;
+        }
+        .small {
+            font-size: 0.5em !important;
+            margin-top: -0.5em !important;
+        }
+        </style>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+                    <h2>Introduction to <br>
+                        <span class="yellow">functional reactive programming</span>
+                        <br>with Cycle.js</h2>
+                    <p>Jan van Brügge & Alexander Späth</p>
+                </section>
+                <section>
+                    <h2>Motivation</h2>
+                    <li class="fragment fade-in">
+                        <span class="yellow">Dataflow</span>: See your data flowing through your app
+                    </li>
+                    <li class="fragment fade-in">
+                        <span class="yellow">Predictable</span>: Due to its functional nature, with immutablity at the core, state updates never modify previous state
+                    </li>
+                    <li class="fragment fade-in">
+                        <span class="yellow">Testable</span>: With a pure app you dont have to mock external APIs, just pass in fake streams
+                    </li>
+                </section>
+				<section>
+                    <h2>Why streams?</h2>
+                </section>
+                <section>
+                    <h3>Transforming data - <span class="yellow">synchronous</span></h3>
+                    <pre><code data-trim data-noescape class="hljs javascript">
+                    [1, 2, 3, 4, 5]
+                        .map(x => x * 2)
+                        .forEach(x => console.log(x));
+                    </code></pre>
+                </section>
+                <section>
+                    <h3>Transforming data - <span class="yellow">asynchronous</span></h3>
+                    <pre><code data-trim data-noescape class="hljs javascript">
+                    Promise.resolve([1, 2, 3, 4, 5]) //Or from API
+                        .then(arr => arr
+                            .map(x => x * 2)
+                            .forEach(x => console.log(x))
+                        );
+                    </code></pre>
+                </section>
+                <section>
+                    <h3>Transforming data - <span class="yellow">streaming</span></h3>
+                    <pre><code data-trim data-noescape class="hljs javascript">
+                    Observable.from([1, 2, 3, 4, 5]) //Or from a websocket
+                        .map(x => x * 2)
+                        .subscribe(x => console.log(x));
+                    </code></pre>
+                </section>
+                <section>
+                    <h3 class="yellow">The catch</h3>
+                    <span>Array \(\subset\) Promise \(\subset\) Stream</span>
+                </section>
+                <section>
+                    <h3>What problems are easier to solve with streams</h3>
+                    <p>Make an <span class="yellow">initial request</span> to the server and write the data to the DOM. Update the data with a <span class="yellow">websocket</span>.</p>
+                    <pre><code data-trim data-noescape class="hljs javascript">
+                    const ws$ = websocket$.map(message => message.payload);
+                    const http$ = response$.map(res => res.body)
+                        .map(xs.fromArray)
+                        .flatten();
+
+                    xs.merge(ws$, http$)
+                        .fold((data, x) => data.concat(x), [])
+                        .compose(debounce(50)) //Batch DOM updates
+                        .subscribe({ next: updateDOM });
+                    </code></pre>
+                </section>
+                <section>
+                    <h1 class="yellow">Cycle.js</h1>
+                </section>
+                <section>
+                    <blockquote>Cycle is like the physicist’s dream of a unified theory of everything, but for JavaScript.</blockquote>
+                    <p style="font-style: italic">Nick Johnstone</p>
+                </section>
+                <section>
+                    <img src="./everywhere_meme.jpg" />
+                </section>
+                <section>
+                    <p>A Cycle.js app is just a function taking <span class="yellow">sources</span> as input and returning <span class="yellow">sinks</span> as result.</p>
+                </section>
+                <section>
+                    <img style="background-color: white;" src="./cycle-app.svg" />
+                </section>
+                <section>
+                    <h3>Cycle.js - <span class="yellow">short summary</span></h3>
+                    <ul>
+                        <li>Common interface are streams</li>
+                        <li>Cycle app = function from sources to sinks</li>
+                        <li>Expandable with own side effects</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>A simple counter app example</h3>
+                </section>
+                <section>
+                    <pre><code data-trim data-noescape style="height: auto !impotant; max-height: 100%; margin-top: -1em;" class="hljs javascript">
+                    import xs from 'xstream';
+                    import { div, button, p } from '@cycle/dom';
+
+                    function Counter(sources) {
+                      const decrement$ = sources.DOM
+                        .select('.decrement').events('click').mapTo(-1);
+
+                      const increment$ = sources.DOM
+                        .select('.increment').events('click').mapTo(+1);
+
+                      const action$ = xs.merge(decrement$, increment$);
+                      const count$ = action$.fold((x, y) => x + y, 0);
+
+                      const vdom$ = count$.map(count =>
+                        div([
+                          button('.decrement', 'Decrement'),
+                          button('.increment', 'Increment'),
+                          p('Counter: ' + count)
+                        ])
+                      );
+                      return {
+                        DOM: vdom$
+                      };
+                    }
+                    </code></pre>
+                </section>
+                <section>
+                    <img src="./devtool.png" style="margin-top: -0.5em" />
+                </section>
+                <section>
+                    <h3>Implications of cycle app = function</h3>
+                    <img src="./nested-components.svg" style="background: white; width: 80% !important; display: block mergin: auto;" />
+                    <ul class="yellow">
+                        <li>Nestable</li>
+                        <li>Wrappable</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>Wrappable - <span class="yellow">isolation</span></h3>
+                    <pre><code data-trim style="height: auto !impotant; width: 110% !important; max-height: 100%;" class="hljs javascript">
+                    import Counter from './counter';
+
+                    function main(sources) {
+                      const counter1 = Counter(sources);
+                      const counter2 = Counter(sources);
+
+                      const vdom$ = xs.combine(counter1.DOM, counter2.DOM)
+                        .map(children =>
+                            <div>
+                                <h1>Some children</h1>
+                                { children }
+                            </div>
+                        );
+
+                      return {
+                        DOM: vdom$
+                      };
+                    }
+                    </code></pre>
+                </section>
+                <section>
+                    <h3 class="yellow">Problem</h3>
+                    <p>Both counters are activated if you press <span class="yellow">any</span> button</p>
+                </section>
+                <section>
+                    <h3 class="yellow">Solution</h3>
+                    <p>Isolate them!</p>
+                </section>
+                <section>
+                    <h3>Wrappable - <span class="yellow">isolation</span></h3>
+                    <pre><code data-trim style="height: auto !impotant; width: 110% !important; max-height: 100%;" class="hljs diff">
+                    import Counter from './counter';
+
+                    function main(sources) {
+                    - const counter1 = Counter(sources);
+                    - const counter2 = Counter(sources);
+                    + const counter1 = isolate(Counter, 'counterA')(sources);
+                    + const counter2 = isolate(Counter, 'counterB')(sources);
+
+
+                      const vdom$ = xs.combine(counter1.DOM, counter2.DOM)
+                        .map(children =>
+                            <div>
+                                <h1>Some children</h1>
+                                { children }
+                            </div>
+                        );
+
+                      return {
+                        DOM: vdom$
+                      };
+                    }
+                    </code></pre>
+                </section>
+                <section>
+                    <h2 class="yellow">State management</h2>
+                </section>
+                <section>
+                    <h3 class="yellow">Onionify</h3>
+                    <p>A fractal state management tool for Cycle.js applications.</p>
+                </section>
+                <section>
+                    <pre><code data-trim data-noescape style="height: auto !impotant; max-height: 100%; margin-top: -1.5em;" class="hljs javascript">
+                    import xs from 'xstream';
+
+                    function Counter(sources) {
+                      const decrement$ = sources.DOM
+                        .select('.decrement').events('click')
+                        .map(_ => state => state - 1);
+
+                      const increment$ = sources.DOM
+                        .select('.increment').events('click')
+                        .map(_ => state => state + 1);
+
+                      const reducer$ = xs.merge(decrement$, increment$);
+
+                      const vdom$ = sources.onion.state$.map(count =>
+                        div([
+                          button('.decrement', 'Decrement'),
+                          button('.increment', 'Increment'),
+                          p('Counter: ' + count)
+                        ])
+                      );
+                      return {
+                        DOM: vdom$,
+                        onion: reducer$
+                      };
+                    }
+                    </code></pre>
+                </section>
+                <section>
+                    <h3 class="yellow">Fractal state</h3>
+                    <pre><code data-trim style="height: auto !impotant; max-height: 100%; margin-top: -0.5em;" class="hljs javascript">
+                    import Counter from './counter';
+
+                    function main(sources) {
+                      const counter1 = isolate(Counter, 'counterA')(sources);
+                      const counter2 = isolate(Counter, 'counterB')(sources);
+
+
+                      const vdom$ = xs.combine(counter1.DOM, counter2.DOM)
+                        .map(children =>
+                            <div>
+                                <h1>Some children</h1>
+                                { children }
+                            </div>
+                        );
+
+                      return {
+                        DOM: vdom$,
+                        onion: xs.merge(counter1.onion, counter2.onion),
+                        log: sources.onion.state$ //what will be printed?
+                      };
+                    }
+                    </code></pre>
+                </section>
+                <section>
+                    <pre><code data-trim style="height: auto !impotant; max-height: 100%;" class="hljs json">
+                    {
+                        counterA: 5,
+                        counterB: 3
+                    }
+                    </code></pre>
+                </section>
+                <section>
+                    <h3 class="yellow">Lenses</h3>
+                    <p>Compare the parent state to the child state</P>
+                    <pre><code data-trim style="height: auto !impotant; max-height: 100%;" class="hljs json">
+                    {
+                        counterA: 5,
+                        counterB: 3
+                    }
+
+                    //childA
+                    5
+
+                    //childB
+                    3
+                    </code></pre>
+                </section>
+                <section>
+                    <h3 class="yellow">Lenses</h3>
+                    <p>We can model this behavior</P>
+                    <pre><code data-trim style="height: auto !impotant; max-height: 100%;" class="hljs haskell">
+                    -- on the source (state$)
+                    isolateSource :: ParentState -> ChildState
+
+                    -- on the sink (reducer$)
+                    isolateSinks :: (ParentState, ChildState) -> ParentState
+                    </code></pre>
+                </section>
+                <section>
+                    <h3 class="yellow">Lenses</h3>
+                    <p>We can model this behavior</P>
+                    <pre><code data-trim style="height: auto !impotant; max-height: 100%;" class="hljs haskell">
+                    -- on the source (state$)
+                    get :: ParentState -> ChildState
+
+                    -- on the sink (reducer$)
+                    set :: (ParentState, ChildState) -> ParentState
+                    </code></pre>
+                </section>
+                <section>
+                    <h3 class="yellow">Lenses</h3>
+                    <p>We can model this behavior</P>
+                    <pre><code data-trim style="height: auto !impotant; max-height: 100%;" class="hljs javascript">
+                    const lens = {
+                        get,
+                        set
+                    };
+                    </code></pre>
+                </section>
+                <section>
+                    <h3 class="yellow" style="margin-top: -0.5em;">Lenses</h3>
+                    <pre><code data-trim style="height: auto !impotant; max-height: 100%; margin-top: -1em;" class="hljs javascript">
+                    const halfLens = {
+                        get: state => state.counterA / 2;
+                        set: (state, n) => ({
+                            ...state,
+                            counterA: n * 2
+                        })
+                    };
+
+                    function main(sources) {
+                      const counter1 = isolate(Counter, 'counterA')(sources);
+                      const counter2 = isolate(Counter, {
+                          onion: halfLens,
+                          '*': 'counterB'
+                      })(sources);
+
+                      const vdom$ = xs.combine(counter1.DOM, counter2.DOM)
+                        .map(view);
+
+                      return {
+                        DOM: vdom$,
+                        onion: xs.merge(counter1.onion, counter2.onion),
+                      };
+                    }
+                    </code></pre>
+                </section>
+                <section>
+                    <h3 class="yellow" style="margin-top: -0.5em;">Collections</h3>
+                    <pre><code data-trim style="height: auto !impotant; width: 110%; max-height: 100%; margin-top: -1em;" class="hljs typescript">
+                    interface TabbarState {
+                        active: number;
+                        tabs: TabState[];
+                    }
+                    interface TabState {
+                        isActive: boolean; //Automaticly set by the lens
+                        id: number;
+                        name: string;
+                    }
+                    const selectionLens = {
+                        get: state => state.tabs.map(t => ({
+                            ...t,
+                            isActive: t.id === state.active
+                        })),
+                        set: (state, tabs) => ({
+                            ...state,
+                            active: tabs.reduce((acc, curr) => {
+                                return curr.isActive && curr.id !== state.active ?
+                                    curr.id : acc;
+                                }, state.active),
+                            tabs: tabs.map(omit('isActive'))
+                        })
+                    };
+                    </code></pre>
+                </section>
+                <section>
+                    <h3 class="yellow">Collections</h3>
+                    <pre><code data-trim style="height: auto !impotant; max-height: 100%; width: 110%;" class="hljs javascript">
+                    const TabbarComponent = makeCollection({
+                        item: TabComponent,
+                        itemKey: itemState => itemState.name,
+                        collectSinks: instances => ({
+                            DOM: instances.pickCombine('DOM').map(children =>
+                                <ul>{ children }</ul>
+                            ),
+                            onion: xs.merge(
+                                xs.of(() => initialState),
+                                instances.pickMerge('onion')
+                            )
+                        })
+                    });
+
+                    export default const isolatedTabbar = isolate(TabbarComponent, {
+                        onion: selectionLens,
+                        '*': null
+                    });
+                    </code></pre>
+                </section>
+                <section>
+                    <h3>Quick <span class="yellow">FAQ</span></h3>
+                    <ul>
+                        <li class="fragment fade-in">
+                            <span class="yellow">How do I start?</span>
+                            <a href="https://cycle.js.org/#-dataflow">Read the docs</a> and/or watch the <a href="https://egghead.io/courses/cycle-js-fundamentals">egghead.io course</a>
+                        </li>
+                        <li class="fragment fade-in">
+                            <span class="yellow">Do I have to use xstream?</span>
+                            No, you can also use RxJS or Most.js
+                        </li>
+                        <li class="fragment fade-in">
+                            <span class="yellow">How big is the community?</span>
+                            Currently over 8400 github stars, active support on gitter
+                        </li>
+                        <li class="fragment fade-in">
+                            <span class="yellow">How is the financial support?</span>
+                            We are on OpenCollective, being sponsored by Verizon and others
+                        </li>
+
+                    </ul>
+                </section>
+                <section>
+                    <h2><span class="yellow">Other</span> questions</h2>
+                </section>
+            <div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+                slideNumber: true,
+                math: {
+                    mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js',
+                    config: 'TeX-AMS_HTML-full'
+                },
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+                    { src: 'plugin/math/math.js', async: true }
+				]
+			});
+		</script>
+	</body>
+</html>
