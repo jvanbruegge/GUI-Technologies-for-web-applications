@@ -10,14 +10,35 @@ html, body, #app {
 }
 
 #app {
+    display: flex;
     justify-content: center;
+    padding: 10px 0;
+}
+
+@media (orientation: landscape) {
+    #app {
+        flex-direction: row;
+    }
+
+    table {
+        height: calc(100vh - 20px);
+        width: calc(100vh - 20px);
+    }
+}
+
+@media (orientation: portrait) {
+    #app {
+        flex-direction: column;
+    }
+
+    table {
+        height: calc(100vw - 20px);
+        width: calc(100vw - 20px);
+    }
 }
 
 table {
-    height: calc(100vh - 20px);
-    width: calc(100vh - 20px);
-    margin: 10px auto;
-
+    margin-left: 10px;
     table-layout: fixed;
     border-collapse: collapse;
 
@@ -27,21 +48,40 @@ table {
 td {
     width: calc(100% / 8);
     height: calc(100% / 8);
+    padding: 4px;
 
     text-align: center;
     vertical-align: middle;
+
+    img {
+        width: 100%;
+        height: 100%;
+    }
 }
 
 td:empty:after {
   content: "\00a0";
 }
 
-tr:nth-child(2n) > td:nth-child(2n + 1) {
-    color: white;
-    background: black;
+$dark_field: #d18b47;
+$light_field: #ffce9e;
+
+tr:nth-child(2n) {
+    & > td:nth-child(2n) {
+        background: $light_field;
+    }
+
+    & > td:nth-child(2n + 1) {
+        background: $dark_field;
+    }
 }
 
-tr:nth-child(2n + 1) > td:nth-child(2n) {
-    color: white;
-    background: black;
+tr:nth-child(2n + 1) {
+    & > td:nth-child(2n) {
+        background: $dark_field;
+    }
+
+    & > td:nth-child(2n + 1) {
+        background: $light_field;
+    }
 }
