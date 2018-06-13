@@ -14,14 +14,14 @@ html, body, #app {
 }
 
 table {
-    height: 100vh;
-    width: 100vh;
-    margin: 0 auto;
+    height: calc(100vh - 20px);
+    width: calc(100vh - 20px);
+    margin: 10px auto;
 
     table-layout: fixed;
     border-collapse: collapse;
 
-    border: 10px solid darkgrey;
+    outline: 10px solid darkgrey;
 }
 
 td {
