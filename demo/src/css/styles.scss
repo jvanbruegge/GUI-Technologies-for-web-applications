@@ -36,12 +36,12 @@ td:empty:after {
   content: "\00a0";
 }
 
-tr:nth-child(2n) > td:nth-child(2n) {
+tr:nth-child(2n) > td:nth-child(2n + 1) {
     color: white;
     background: black;
 }
 
-tr:nth-child(2n + 1) > td:nth-child(2n + 1) {
+tr:nth-child(2n + 1) > td:nth-child(2n) {
     color: white;
     background: black;
 }
