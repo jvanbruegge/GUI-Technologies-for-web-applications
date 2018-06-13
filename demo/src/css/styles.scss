@@ -18,13 +18,22 @@ table {
     height: 100vh;
     width: 100vh;
 
+    table-layout: fixed;
     border-collapse: collapse;
+
     border: 10px solid darkgrey;
 }
 
 td {
     width: calc(100% / 8);
     height: calc(100% / 8);
+
+    text-align: center;
+    vertical-align: middle;
+}
+
+td:empty:after {
+  content: "\00a0";
 }
 
 tr:nth-child(2n) > td:nth-child(2n) {

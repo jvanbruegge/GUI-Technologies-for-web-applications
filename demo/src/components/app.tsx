@@ -7,6 +7,8 @@ import { pickMergeSinks, mergeSinks } from 'cyclejs-utils';
 import { driverNames } from '../drivers';
 import { BaseSources, BaseSinks } from '../interfaces';
 
+import { defaultBoard } from './boardConfig';
+
 import {
     State as FieldState,
     defaultState as defaultFieldState,
@@ -24,7 +26,7 @@ export interface State {
     fields: FieldState[][];
 }
 export const defaultState: State = {
-    fields: Array(8).fill(Array(8).fill(defaultFieldState))
+    fields: defaultBoard
 };
 export type Reducer = (prev?: State) => State | undefined;
 
