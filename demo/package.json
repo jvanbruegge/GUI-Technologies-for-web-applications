@@ -16,6 +16,7 @@
     "@cycle/time": "^0.13.0",
     "cycle-onionify": "^6.0.0",
     "cyclejs-utils": "^3.1.0",
+    "deep-equal": "^1.0.1",
     "xstream": "^11.4.0"
   },
   "scripts": {

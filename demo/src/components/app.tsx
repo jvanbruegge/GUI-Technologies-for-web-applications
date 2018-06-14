@@ -12,7 +12,6 @@ import { ChessPiece } from './piece';
 
 import {
     State as FieldState,
-    defaultState as defaultFieldState,
     Field
 } from './field';
 
@@ -36,6 +35,7 @@ export type Reducer = (prev?: State) => State | undefined;
 const FieldRow = makeCollection({
     item: Field,
     itemKey: (_, i) => 'field' + i,
+    itemScope: key => ({ onion: null, '*': key }),
     collectSinks: pickMergeSinks(driverNames, {
         DOM: ins => ins.pickCombine('DOM').map(tr)
     }) as any
@@ -44,6 +44,7 @@ const FieldRow = makeCollection({
 const Board = makeCollection({
     item: FieldRow,
     itemKey: (_, i) => 'row' + i,
+    itemScope: key => ({ onion: null, '*': key }),
     collectSinks: pickMergeSinks(driverNames, {
         DOM: ins => ins.pickCombine('DOM').map(table)
     }) as any

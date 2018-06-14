@@ -1,4 +1,5 @@
 import xs, { Stream } from 'xstream';
+import sampleCombine from 'xstream/extra/sampleCombine';
 import { VNode, td } from '@cycle/dom';
 import { StateSource } from 'cycle-onionify';
 
@@ -15,27 +16,39 @@ export interface Sinks extends BaseSinks {
 
 export interface State {
     piece?: ChessPiece;
+    activePiece: [number, number] | undefined;
     x: number;
     y: number;
 }
+export type Reducer = (prev: State) => State | undefined;
 
-export const defaultState = {};
-export type Reducer = (prev?: State) => State | undefined;
+export function Field({ onion, DOM }: Sources): Sinks {
+    const selectPiece$: Stream<Reducer> = DOM.events('click')
+        .compose(sampleCombine(onion.state$))
+        .map(([_, s]) => s)
+        .filter(({ piece }) => piece !== undefined)
+        .mapTo<Reducer>(prev => ({ ...prev, activePiece: [prev.x, prev.y] }));
 
-export function Field({ onion }: Sources): Sinks {
-    const display$: Stream<[VNode | string]> = onion.state$.map<any>(
-        ({ piece }) =>
-            piece === undefined
-                ? ['']
-                : [
-                      <img
+    const vdom$: Stream<VNode> = onion.state$.map<any>(
+        state => {
+            const { piece } = state;
+            const vdom = piece === undefined
+                ? ''
+                : <img
                           src={`/pieces/${piece.type}_${piece.color}.svg`}
                           alt={piece.type}
-                      />
-                  ]
-    );
+                      />;
+
+            return [vdom, state];
+        })
+        .map(([child, { activePiece, x, y }]) =>
+            <td class-isActive={ activePiece && activePiece[0] === x && activePiece[1] === y }>
+            { child }
+            </td>
+        );
 
     return {
-        DOM: display$.map(td)
+        DOM: vdom$,
+        onion: selectPiece$
     };
 }

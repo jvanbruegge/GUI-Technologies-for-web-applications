@@ -64,6 +64,10 @@ td {
     }
 }
 
+td.isActive {
+    border: 5px solid red;
+}
+
 td:empty:after {
   content: "\00a0";
 }

@@ -1,6 +1,7 @@
 import { Lens } from 'cycle-onionify';
+const deepEqual = require('deep-equal');
 
-import { State as FieldState, defaultState } from './field';
+import { State as FieldState } from './field';
 import { ChessPiece, Color } from './piece';
 import { State as AppState } from './app';
 
@@ -11,18 +12,19 @@ const pawns: (c: Color, y: number) => ChessPiece[] = (color, y) =>
             color,
             type: 'pawn',
             x: i,
-            y
+            y,
+            wasMoved: false
         }));
 
 const others: (c: Color, y: number) => ChessPiece[] = (color, y) => [
-    { color, type: 'rook', x: 0, y },
-    { color, type: 'knight', x: 1, y },
-    { color, type: 'bishop', x: 2, y },
-    { color, type: 'queen', x: 3, y },
-    { color, type: 'king', x: 4, y },
-    { color, type: 'bishop', x: 5, y },
-    { color, type: 'knight', x: 6, y },
-    { color, type: 'rook', x: 7, y }
+    { color, type: 'rook', x: 0, y, wasMoved: false },
+    { color, type: 'knight', x: 1, y, wasMoved: false },
+    { color, type: 'bishop', x: 2, y, wasMoved: false },
+    { color, type: 'queen', x: 3, y, wasMoved: false },
+    { color, type: 'king', x: 4, y, wasMoved: false },
+    { color, type: 'bishop', x: 5, y, wasMoved: false },
+    { color, type: 'knight', x: 6, y, wasMoved: false },
+    { color, type: 'rook', x: 7, y, wasMoved: false }
 ];
 
 export const defaultPieces = others('black', 0)
@@ -37,7 +39,11 @@ export const boardLens: Lens<AppState, FieldState[][]> = {
         for(let y = 0; y < 8; y++) {
             let row: FieldState[] = [];
             for(let x = 0; x < 8; x++) {
-                row.push({ ...defaultState, x, y });
+                row.push({
+                    x,
+                    y,
+                    activePiece
+                });
             }
             emptyBoard.push(row);
         }
@@ -48,5 +54,18 @@ export const boardLens: Lens<AppState, FieldState[][]> = {
 
         return emptyBoard;
     },
-    set: x => x
+    set: (state: AppState, boardState: FieldState[][]) => {
+        let newState = { ...state };
+
+        for(let y = 0; y < 8; y++) {
+            for(let x = 0; x < 8; x++) {
+                if(!deepEqual(state.activePiece, boardState[y][x].activePiece)) {
+                    newState.activePiece = boardState[y][x].activePiece;
+                    break;
+                }
+            }
+        }
+
+        return newState;
+    }
 };
