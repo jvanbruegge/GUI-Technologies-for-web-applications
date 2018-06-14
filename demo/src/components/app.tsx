@@ -30,7 +30,7 @@ export const defaultState: State = {
     pieces: defaultPieces,
     activePiece: undefined
 };
-export type Reducer = (prev?: State) => State | undefined;
+export type Reducer = (prev: State) => State | undefined;
 
 const FieldRow = makeCollection({
     item: Field,
@@ -53,13 +53,16 @@ const Board = makeCollection({
 export function App(sources: Sources): Sinks {
     const initReducer$ = xs.of<Reducer>(() => defaultState);
 
+    const resetSelection$ = sources.DOM.events('click')
+        .mapTo<Reducer>(prev => ({ ...prev, activePiece: undefined }));
+
     const boardSinks = isolate(Board, {
         onion: boardLens,
         '*': 'fields'
     })(sources);
 
     const sinks = {
-        onion: initReducer$
+        onion: xs.merge(initReducer$, resetSelection$)
     };
 
     return mergeSinks([sinks, boardSinks]);

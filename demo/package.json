@@ -10,7 +10,7 @@
     "prettier": "^1.13.5"
   },
   "dependencies": {
-    "@cycle/dom": "^20.4.0",
+    "@cycle/dom": "^21.0.0-experimental.3",
     "@cycle/isolate": "^3.3.0",
     "@cycle/run": "^4.1.0",
     "@cycle/time": "^0.13.0",
