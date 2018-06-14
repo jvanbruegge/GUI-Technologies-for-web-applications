@@ -1,22 +1,45 @@
+import { Lens } from 'cycle-onionify';
+
 import { State as FieldState, defaultState } from './field';
 import { ChessPiece, Color } from './piece';
+import { State as AppState } from './app';
 
-const pawnRow: (c: Color) => FieldState[] = color =>
-    Array(8).fill({
-        piece: { type: 'pawn', color }
-    });
+const pawns: (c: Color, y: number) => ChessPiece[] = (color, y) =>
+    Array(8)
+        .fill(null)
+        .map<ChessPiece>((_, i) => ({
+            color,
+            type: 'pawn',
+            x: i,
+            y
+        }));
 
-const backRow: (c: Color) => FieldState[] = color => [
-    { piece: { type: 'rook', color } },
-    { piece: { type: 'knight', color } },
-    { piece: { type: 'bishop', color } },
-    { piece: { type: 'queen', color } },
-    { piece: { type: 'king', color } },
-    { piece: { type: 'bishop', color } },
-    { piece: { type: 'knight', color } },
-    { piece: { type: 'rook', color } }
+const others: (c: Color, y: number) => ChessPiece[] = (color, y) => [
+    { color, type: 'rook', x: 0, y },
+    { color, type: 'knight', x: 1, y },
+    { color, type: 'bishop', x: 2, y },
+    { color, type: 'queen', x: 3, y },
+    { color, type: 'king', x: 4, y },
+    { color, type: 'bishop', x: 5, y },
+    { color, type: 'knight', x: 6, y },
+    { color, type: 'rook', x: 7, y }
 ];
 
-export const defaultBoard: FieldState[][] = [backRow('black'), pawnRow('black')]
-    .concat(Array(4).fill(Array(8).fill(defaultState)))
-    .concat([pawnRow('white'), backRow('white')]);
+export const defaultPieces = others('black', 0)
+    .concat(pawns('black', 1))
+    .concat(pawns('white', 6))
+    .concat(others('white', 7));
+
+export const boardLens: Lens<AppState, FieldState[][]> = {
+    get: ({ pieces, activePiece }: AppState) => {
+        const emptyBoard = Array(8).fill(Array(8).fill({}))
+            .map((arr, y) => arr.map((_, x) => ({ ...defaultState, x, y })));
+
+        pieces.forEach(p => {
+            emptyBoard[p.y][p.x].piece = p;
+        });
+
+        return emptyBoard;
+    },
+    set: x => x
+};

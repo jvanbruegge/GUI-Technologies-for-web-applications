@@ -15,20 +15,25 @@ export interface Sinks extends BaseSinks {
 
 export interface State {
     piece: ChessPiece | undefined;
+    x: number;
+    y: number;
 }
 
 export const defaultState = {};
 export type Reducer = (prev?: State) => State | undefined;
 
 export function Field({ onion }: Sources): Sinks {
-
-    const display$: Stream<[VNode | string]> = onion.state$
-        .map<any>(({ piece }) => piece === undefined ? [''] : [
-            <img
-                src={ `/pieces/${piece.type}_${piece.color}.svg` }
-                alt={ piece.type }
-            />
-        ]);
+    const display$: Stream<[VNode | string]> = onion.state$.map<any>(
+        ({ piece }) =>
+            piece === undefined
+                ? ['']
+                : [
+                      <img
+                          src={`/pieces/${piece.type}_${piece.color}.svg`}
+                          alt={piece.type}
+                      />
+                  ]
+    );
 
     return {
         DOM: display$.map(td)

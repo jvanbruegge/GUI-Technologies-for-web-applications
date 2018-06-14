@@ -7,7 +7,8 @@ import { pickMergeSinks, mergeSinks } from 'cyclejs-utils';
 import { driverNames } from '../drivers';
 import { BaseSources, BaseSinks } from '../interfaces';
 
-import { defaultBoard } from './boardConfig';
+import { defaultPieces, boardLens } from './boardConfig';
+import { ChessPiece } from './piece';
 
 import {
     State as FieldState,
@@ -23,10 +24,12 @@ export interface Sinks extends BaseSinks {
 }
 
 export interface State {
-    fields: FieldState[][];
+    pieces: ChessPiece[];
+    activePiece: [number, number] | undefined;
 }
 export const defaultState: State = {
-    fields: defaultBoard
+    pieces: defaultPieces,
+    activePiece: undefined
 };
 export type Reducer = (prev?: State) => State | undefined;
 
@@ -49,7 +52,11 @@ const Board = makeCollection({
 export function App(sources: Sources): Sinks {
     const initReducer$ = xs.of<Reducer>(() => defaultState);
 
-    const boardSinks = isolate(Board, 'fields')(sources);
+    const boardSinks = isolate(Board, {
+        onion: boardLens,
+        '*': 'fields'
+    })(sources);
+
     const sinks = {
         onion: initReducer$
     };
