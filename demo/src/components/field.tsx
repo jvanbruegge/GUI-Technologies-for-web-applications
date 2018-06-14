@@ -14,7 +14,7 @@ export interface Sinks extends BaseSinks {
 }
 
 export interface State {
-    piece: ChessPiece | undefined;
+    piece?: ChessPiece;
     x: number;
     y: number;
 }

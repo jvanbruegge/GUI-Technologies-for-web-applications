@@ -32,8 +32,15 @@ export const defaultPieces = others('black', 0)
 
 export const boardLens: Lens<AppState, FieldState[][]> = {
     get: ({ pieces, activePiece }: AppState) => {
-        const emptyBoard = Array(8).fill(Array(8).fill({}))
-            .map((arr, y) => arr.map((_, x) => ({ ...defaultState, x, y })));
+        let emptyBoard: FieldState[][] = [];
+
+        for(let y = 0; y < 8; y++) {
+            let row: FieldState[] = [];
+            for(let x = 0; x < 8; x++) {
+                row.push({ ...defaultState, x, y });
+            }
+            emptyBoard.push(row);
+        }
 
         pieces.forEach(p => {
             emptyBoard[p.y][p.x].piece = p;
