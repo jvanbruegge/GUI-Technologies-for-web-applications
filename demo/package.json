@@ -2,6 +2,7 @@
   "name": "chess",
   "version": "0.1.0",
   "private": true,
+  "license": "(BSD-3-Clause or Apache-2.0)",
   "devDependencies": {
     "cycle-scripts-one-fits-all": "5.4.3",
     "husky": "^0.14.3",
