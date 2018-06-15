@@ -49,8 +49,6 @@ export function Board(sources: Sources): Sinks {
                         : a
             );
 
-            debugger;
-
             const newPieces = prev.pieces
                 .filter(p => p.x !== piece.x || p.y !== piece.y)
                 .filter(p => p.x !== x || p.y !== y)
