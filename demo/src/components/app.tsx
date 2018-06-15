@@ -10,10 +10,7 @@ import { BaseSources, BaseSinks } from '../interfaces';
 import { defaultPieces, boardLens } from './boardConfig';
 import { ChessPiece } from './piece';
 
-import {
-    State as FieldState,
-    Field
-} from './field';
+import { State as FieldState, Field } from './field';
 
 export interface Sources extends BaseSources {
     onion: StateSource<State>;
@@ -53,8 +50,9 @@ const Board = makeCollection({
 export function App(sources: Sources): Sinks {
     const initReducer$ = xs.of<Reducer>(() => defaultState);
 
-    const resetSelection$ = sources.DOM.events('click')
-        .mapTo<Reducer>(prev => ({ ...prev, activePiece: undefined }));
+    const resetSelection$ = sources.DOM.events('click').mapTo<Reducer>(
+        prev => ({ ...prev, activePiece: undefined })
+    );
 
     const boardSinks = isolate(Board, {
         onion: boardLens,

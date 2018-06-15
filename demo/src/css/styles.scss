@@ -68,6 +68,10 @@ td.isActive {
     border: 5px solid red;
 }
 
+td.highlight {
+    border: 3px solid blue;
+}
+
 td:empty:after {
   content: "\00a0";
 }

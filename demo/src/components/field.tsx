@@ -17,6 +17,7 @@ export interface Sinks extends BaseSinks {
 export interface State {
     piece?: ChessPiece;
     activePiece: [number, number] | undefined;
+    highlighted: boolean;
     x: number;
     y: number;
 }
@@ -29,23 +30,31 @@ export function Field({ onion, DOM }: Sources): Sinks {
         .filter(({ piece }) => piece !== undefined)
         .mapTo<Reducer>(prev => ({ ...prev, activePiece: [prev.x, prev.y] }));
 
-    const vdom$: Stream<VNode> = onion.state$.map<any>(
-        state => {
+    const vdom$: Stream<VNode> = onion.state$
+        .map<any>(state => {
             const { piece } = state;
-            const vdom = piece === undefined
-                ? ''
-                : <img
-                          src={`/pieces/${piece.type}_${piece.color}.svg`}
-                          alt={piece.type}
-                      />;
+            const vdom =
+                piece === undefined ? (
+                    ''
+                ) : (
+                    <img
+                        src={`/pieces/${piece.type}_${piece.color}.svg`}
+                        alt={piece.type}
+                    />
+                );
 
             return [vdom, state];
         })
-        .map(([child, { activePiece, x, y }]) =>
-            <td class-isActive={ activePiece && activePiece[0] === x && activePiece[1] === y }>
-            { child }
+        .map(([child, { activePiece, x, y, highlighted }]) => (
+            <td
+                class-isActive={
+                    activePiece && activePiece[0] === x && activePiece[1] === y
+                }
+                class-highlight={highlighted}
+            >
+                {child}
             </td>
-        );
+        ));
 
     return {
         DOM: vdom$,
