@@ -1,3 +1,5 @@
+import { pawnLogic, rookLogic } from './logic';
+
 export interface ChessPiece {
     type: Piece;
     color: Color;
@@ -9,10 +11,14 @@ export interface ChessPiece {
 export type Color = 'black' | 'white';
 export type Piece = 'pawn' | 'knight' | 'bishop' | 'rook' | 'queen' | 'king';
 
+export type LookupFn = (x: number, y: number) => ChessPiece | undefined;
+export type LogicFunction = (c: ChessPiece, l: LookupFn) => [number, number][];
+
 const movementLogic: {
-    [type: string]: (c: ChessPiece, l: LookupFn) => [number, number][];
+    [type: string]: LogicFunction;
 } = {
-    pawn: pawnLogic
+    pawn: pawnLogic,
+    rook: rookLogic
 };
 
 export function getValidFields(
@@ -20,28 +26,4 @@ export function getValidFields(
     lookup: LookupFn
 ): [number, number][] {
     return movementLogic[activePiece.type](activePiece, lookup);
-}
-
-export type LookupFn = (x: number, y: number) => ChessPiece | undefined;
-
-function pawnLogic(pawn: ChessPiece, lookup: LookupFn): [number, number][] {
-    const forward = (y: number, n: number) =>
-        pawn.color === 'white' ? y - n : y + n;
-
-    let result: [number, number][] = [];
-    if (lookup(pawn.x, forward(pawn.y, 1)) === undefined) {
-        result.push([pawn.x, forward(pawn.y, 1)]);
-    }
-    if (!pawn.wasMoved && lookup(pawn.x, forward(pawn.y, 2)) === undefined) {
-        result.push([pawn.x, forward(pawn.y, 2)]);
-    }
-    for (const x of [pawn.x - 1, pawn.x + 1]) {
-        if (x >= 0 && x < 8) {
-            let enemy = lookup(x, forward(pawn.y, 1));
-            if (enemy !== undefined && enemy.color !== pawn.color) {
-                result.push([x, forward(pawn.y, 1)]);
-            }
-        }
-    }
-    return result;
 }
