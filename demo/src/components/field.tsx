@@ -45,8 +45,8 @@ function intent(DOM: DOMSource, state$: Stream<State>): Intent {
 
     const selectPiece$: Stream<Reducer> = event$
         .filter(
-            ([_, { piece, activePiece }]) =>
-                piece !== undefined && activePiece === undefined
+            ([_, { piece, highlighted }]) =>
+                piece !== undefined && highlighted === false
         )
         .mapTo<Reducer>(prev => ({ ...prev, activePiece: [prev.x, prev.y] }));
 
