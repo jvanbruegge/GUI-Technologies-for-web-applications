@@ -6,9 +6,10 @@ export type Component = (s: BaseSources) => BaseSinks;
 
 export interface BaseSources {
     DOM: DOMSource;
-    time: TimeSource;
+    Time: TimeSource;
 }
 
 export interface BaseSinks {
     DOM?: Stream<VNode>;
+    eventDispatch?: Stream<[Element, Event]>;
 }

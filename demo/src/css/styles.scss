@@ -72,7 +72,7 @@ td.highlight {
     border: 3px solid blue;
 }
 
-td:empty:after {
+td > span:empty:after {
   content: "\00a0";
 }
 
