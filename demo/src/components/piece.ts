@@ -3,7 +3,8 @@ import {
     rookLogic,
     bishopLogic,
     queenLogic,
-    knightLogic
+    knightLogic,
+    kingLogic
 } from './logic';
 
 export interface ChessPiece {
@@ -27,7 +28,8 @@ const movementLogic: {
     rook: rookLogic,
     bishop: bishopLogic,
     queen: queenLogic,
-    knight: knightLogic
+    knight: knightLogic,
+    king: kingLogic
 };
 
 export function getValidFields(

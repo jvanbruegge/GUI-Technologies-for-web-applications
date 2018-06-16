@@ -49,6 +49,25 @@ export const knightLogic: LogicFunction = (piece, lookup) => {
     return result;
 };
 
+export const kingLogic: LogicFunction = (piece, lookup) => {
+    let result: [number, number][] = [];
+
+    for (let i of [-1, 0, 1]) {
+        for (let j of [-1, 0, 1]) {
+            const x = piece.x + i;
+            const y = piece.y + j;
+            if (x >= 0 && x < 8 && y >= 0 && y < 8) {
+                const l = lookup(x, y);
+                if (l === undefined || l.color !== piece.color) {
+                    result.push([x, y]);
+                }
+            }
+        }
+    }
+
+    return result;
+};
+
 export const bishopLogic: LogicFunction = straightLogic((piece, i, dir) => {
     switch (dir) {
         case 0:
