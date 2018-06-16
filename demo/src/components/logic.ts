@@ -22,6 +22,33 @@ export const pawnLogic: LogicFunction = (pawn, lookup) => {
     return result;
 };
 
+export const knightLogic: LogicFunction = (piece, lookup) => {
+    let result: [number, number][] = [];
+
+    const check: (x: number, y: number) => void = (x, y) => {
+        if (x >= 0 && x < 8 && y >= 0 && y < 8) {
+            const l = lookup(x, y);
+            if (l === undefined || l.color !== piece.color) {
+                result.push([x, y]);
+            }
+        }
+    };
+
+    for (let y of [piece.y + 2, piece.y - 2]) {
+        for (let x of [piece.x - 1, piece.x + 1]) {
+            check(x, y);
+        }
+    }
+
+    for (let y of [piece.y + 1, piece.y - 1]) {
+        for (let x of [piece.x + 2, piece.x - 2]) {
+            check(x, y);
+        }
+    }
+
+    return result;
+};
+
 export const bishopLogic: LogicFunction = straightLogic((piece, i, dir) => {
     switch (dir) {
         case 0:

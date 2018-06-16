@@ -1,4 +1,10 @@
-import { pawnLogic, rookLogic, bishopLogic, queenLogic } from './logic';
+import {
+    pawnLogic,
+    rookLogic,
+    bishopLogic,
+    queenLogic,
+    knightLogic
+} from './logic';
 
 export interface ChessPiece {
     type: Piece;
@@ -20,7 +26,8 @@ const movementLogic: {
     pawn: pawnLogic,
     rook: rookLogic,
     bishop: bishopLogic,
-    queen: queenLogic
+    queen: queenLogic,
+    knight: knightLogic
 };
 
 export function getValidFields(
