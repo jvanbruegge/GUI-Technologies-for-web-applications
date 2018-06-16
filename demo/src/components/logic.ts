@@ -22,40 +22,60 @@ export const pawnLogic: LogicFunction = (pawn, lookup) => {
     return result;
 };
 
-export const rookLogic: LogicFunction = (rook, lookup) => {
-    let result: [number, number][] = [];
+export const bishopLogic: LogicFunction = straightLogic((piece, i, dir) => {
+    switch (dir) {
+        case 0:
+            return [piece.x + i, piece.y + i];
+        case 1:
+            return [piece.x + i, piece.y - i];
+        case 2:
+            return [piece.x - i, piece.y + i];
+        default:
+            return [piece.x - i, piece.y - i];
+    }
+});
 
-    const jfns: ((i: number) => number)[] = [
-        i => rook.x - i,
-        i => rook.x + i,
-        i => rook.y - i,
-        i => rook.y + i
-    ];
+export const rookLogic: LogicFunction = straightLogic((piece, i, dir) => {
+    switch (dir) {
+        case 0:
+            return [piece.x + i, piece.y];
+        case 1:
+            return [piece.x - i, piece.y];
+        case 2:
+            return [piece.x, piece.y + i];
+        default:
+            return [piece.x, piece.y - i];
+    }
+});
 
-    const lookups: ((j: number) => ChessPiece | undefined)[] = [
-        j => lookup(j, rook.y),
-        j => lookup(rook.x, j)
-    ];
+export const queenLogic: LogicFunction = (piece, lookup) => {
+    return bishopLogic(piece, lookup).concat(rookLogic(piece, lookup));
+};
 
-    const toPush: (a: number, j: number) => [number, number] = (a, j) =>
-        a < 2 ? [j, rook.y] : [rook.x, j];
+function straightLogic(
+    nextPos: (piece: ChessPiece, i: number, dir: number) => [number, number]
+): LogicFunction {
+    return (piece, lookup) => {
+        let result: [number, number][] = [];
 
-    for (let a = 0; a < 4; a++) {
-        for (let i = 1; i < 8; i++) {
-            const j = jfns[a](i);
-            if (j >= 0 && j < 8) {
-                const l = lookups[Math.floor(a / 2)](j);
-                if (l === undefined) {
-                    result.push(toPush(a, j));
-                } else {
-                    if (l.color !== rook.color) {
-                        result.push(toPush(a, j));
+        for (let dir = 0; dir < 4; dir++) {
+            for (let i = 1; i < 8; i++) {
+                const pos = nextPos(piece, i, dir);
+
+                if (pos[0] >= 0 && pos[0] < 8 && pos[1] >= 0 && pos[1] < 8) {
+                    const l = lookup(pos[0], pos[1]);
+                    if (l === undefined) {
+                        result.push(pos);
+                    } else {
+                        if (l.color !== piece.color) {
+                            result.push(pos);
+                        }
+                        break;
                     }
-                    break;
                 }
             }
         }
-    }
 
-    return result;
-};
+        return result;
+    };
+}
