@@ -8,7 +8,7 @@ export const pawnLogic: LogicFunction = (pawn, lookup) => {
     if (lookup(pawn.x, forward(pawn.y, 1)) === undefined) {
         result.push([pawn.x, forward(pawn.y, 1)]);
     }
-    if (!pawn.wasMoved && lookup(pawn.x, forward(pawn.y, 2)) === undefined) {
+    if (!pawn.wasMoved && lookup(pawn.x, forward(pawn.y, 1)) === undefined && lookup(pawn.x, forward(pawn.y, 2)) === undefined) {
         result.push([pawn.x, forward(pawn.y, 2)]);
     }
     for (const x of [pawn.x - 1, pawn.x + 1]) {
