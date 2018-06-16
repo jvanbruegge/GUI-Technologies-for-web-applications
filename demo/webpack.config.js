@@ -10,6 +10,6 @@ module.exports = {
     output: {
         filename: 'bundle.[hash].js',
         path: appPath('build'),
-        publicPath: '/'
+        publicPath: './'
     }
 };

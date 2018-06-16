@@ -1,0 +1,79 @@
+* {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  margin: 0;
+  padding: 0; }
+
+html, body, #app {
+  height: 100%;
+  width: 100%; }
+
+#app {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center; }
+
+@media (orientation: landscape) {
+  #app {
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row; }
+  table {
+    height: 100vh;
+    width: 100vh; } }
+
+@media (orientation: portrait) {
+  #app {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column; }
+  table {
+    height: 100vw;
+    width: 100vw; } }
+
+table {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(8, 1fr);
+  table-layout: fixed;
+  border-spacing: 0;
+  border: 10px solid darkgrey; }
+
+tr {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: repeat(8, 1fr); }
+
+td {
+  padding: 4px;
+  text-align: center;
+  vertical-align: middle; }
+  td img {
+    width: 100%;
+    height: 100%; }
+
+td.isActive {
+  border: 5px solid red; }
+
+td.highlight {
+  border: 3px solid blue; }
+
+td > span:empty:after {
+  content: "\A0"; }
+
+tr:nth-child(2n) > td:nth-child(2n) {
+  background: #ffce9e; }
+
+tr:nth-child(2n) > td:nth-child(2n + 1) {
+  background: #d18b47; }
+
+tr:nth-child(2n + 1) > td:nth-child(2n) {
+  background: #d18b47; }
+
+tr:nth-child(2n + 1) > td:nth-child(2n + 1) {
+  background: #ffce9e; }

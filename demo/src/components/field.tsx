@@ -75,7 +75,7 @@ function view(state$: Stream<State>): Stream<VNode> {
                     <span />
                 ) : (
                     <img
-                        src={`/pieces/${piece.type}_${piece.color}.svg`}
+                        src={`./pieces/${piece.type}_${piece.color}.svg`}
                         alt={piece.type}
                     />
                 );
