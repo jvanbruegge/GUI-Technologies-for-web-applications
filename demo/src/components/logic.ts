@@ -1,24 +1,28 @@
 import { LogicFunction, ChessPiece } from './piece';
 
 export const pawnLogic: LogicFunction = (pawn, lookup) => {
-    const forward = (y: number, n: number) =>
-        pawn.color === 'white' ? y - n : y + n;
+    const forward = (n: number) =>
+        pawn.color === 'white' ? pawn.y - n : pawn.y + n;
 
     let result: [number, number][] = [];
-    if (lookup(pawn.x, forward(pawn.y, 1)) === undefined) {
-        result.push([pawn.x, forward(pawn.y, 1)]);
-    }
-    if (!pawn.wasMoved && lookup(pawn.x, forward(pawn.y, 1)) === undefined && lookup(pawn.x, forward(pawn.y, 2)) === undefined) {
-        result.push([pawn.x, forward(pawn.y, 2)]);
-    }
-    for (const x of [pawn.x - 1, pawn.x + 1]) {
-        if (x >= 0 && x < 8) {
-            let enemy = lookup(x, forward(pawn.y, 1));
-            if (enemy !== undefined && enemy.color !== pawn.color) {
-                result.push([x, forward(pawn.y, 1)]);
+
+    if (onBoard(forward(1))) {
+        if (lookup(pawn.x, forward(1)) === undefined) {
+            result.push([pawn.x, forward(1)]);
+        }
+        for (const x of [pawn.x - 1, pawn.x + 1]) {
+            if (onBoard(x)) {
+                let enemy = lookup(x, forward(1));
+                if (enemy !== undefined && enemy.color !== pawn.color) {
+                    result.push([x, forward(1)]);
+                }
             }
         }
     }
+    if (!pawn.wasMoved && lookup(pawn.x, forward(1)) === undefined && lookup(pawn.x, forward(2)) === undefined) {
+        result.push([pawn.x, forward(2)]);
+    }
+
     return result;
 };
 
@@ -26,7 +30,7 @@ export const knightLogic: LogicFunction = (piece, lookup) => {
     let result: [number, number][] = [];
 
     const check: (x: number, y: number) => void = (x, y) => {
-        if (x >= 0 && x < 8 && y >= 0 && y < 8) {
+        if (onBoard(x) && onBoard(y)) {
             const l = lookup(x, y);
             if (l === undefined || l.color !== piece.color) {
                 result.push([x, y]);
@@ -56,7 +60,7 @@ export const kingLogic: LogicFunction = (piece, lookup) => {
         for (let j of [-1, 0, 1]) {
             const x = piece.x + i;
             const y = piece.y + j;
-            if (x >= 0 && x < 8 && y >= 0 && y < 8) {
+            if (onBoard(x) && onBoard(y)) {
                 const l = lookup(x, y);
                 if (l === undefined || l.color !== piece.color) {
                     result.push([x, y]);
@@ -108,7 +112,7 @@ function straightLogic(
             for (let i = 1; i < 8; i++) {
                 const pos = nextPos(piece, i, dir);
 
-                if (pos[0] >= 0 && pos[0] < 8 && pos[1] >= 0 && pos[1] < 8) {
+                if (onBoard(pos[0]) && onBoard(pos[1])) {
                     const l = lookup(pos[0], pos[1]);
                     if (l === undefined) {
                         result.push(pos);
@@ -124,4 +128,8 @@ function straightLogic(
 
         return result;
     };
+}
+
+function onBoard(n: number): boolean {
+    return n >= 0 && n < 8;
 }
