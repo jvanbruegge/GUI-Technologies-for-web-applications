@@ -5,20 +5,24 @@ export const pawnLogic: LogicFunction = (pawn, lookup) => {
         pawn.color === 'white' ? pawn.y - n : pawn.y + n;
 
     let result: [number, number][] = [];
-    if (lookup(pawn.x, forward(1)) === undefined) {
-        result.push([pawn.x, forward(1)]);
+
+    if (onBoard(forward(1))) {
+        if (lookup(pawn.x, forward(1)) === undefined) {
+            result.push([pawn.x, forward(1)]);
+        }
+        for (const x of [pawn.x - 1, pawn.x + 1]) {
+            if (onBoard(x)) {
+                let enemy = lookup(x, forward(1));
+                if (enemy !== undefined && enemy.color !== pawn.color) {
+                    result.push([x, forward(1)]);
+                }
+            }
+        }
     }
     if (!pawn.wasMoved && lookup(pawn.x, forward(1)) === undefined && lookup(pawn.x, forward(2)) === undefined) {
         result.push([pawn.x, forward(2)]);
     }
-    for (const x of [pawn.x - 1, pawn.x + 1]) {
-        if (onBoard(x)) {
-            let enemy = lookup(x, forward(1));
-            if (enemy !== undefined && enemy.color !== pawn.color) {
-                result.push([x, forward(1)]);
-            }
-        }
-    }
+
     return result;
 };
 
